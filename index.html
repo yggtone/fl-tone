@@ -25,7 +25,7 @@ function init() {
   bufferLoader = new BufferLoader(
     context,
     [
-      'audio/saw.wav',
+      'audio/sine440.wav',
       'audio/sine440.wav',
     ],
     finishedLoading
@@ -100,13 +100,9 @@ function setPitch(source,rate)
 </script>
 
 <input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
-<input type="button" value="Stop" onclick="newestSource.stop(0);"></input>
-<input type="button" value="Pitch" onclick="pitch += 0.01; newestSource.playbackRate.value = pitch;"></input>
 <input type="range" oninput="setPitch(sourceA.source,value);" value="1.0" step="0.0001" max="3.0" min="0.3"></input>
 <BR>
 <input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
-<input type="button" value="Stop" onclick="newestSource.stop(0);"></input>
-<input type="button" value="Pitch" onclick="pitch += 0.01; newestSource.playbackRate.value = pitch;"></input>
 <input type="range" oninput="setPitch(sourceB.source,value);" value="1.0" step="0.001" max="3.0" min="0.3"></input>
 
 
