@@ -3,4 +3,7 @@
 Web app for manipulating tones with Web Audio API and HTML5. 
  
 Designed for phones and tablets held in portrait orientation, so that the thumbs can control the pitches of the two tones.
+Main content is on pages branch, and demo should be at:
+http://yggtone.github.io/fl-tone/
+
  
