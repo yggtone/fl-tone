@@ -1,21 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="UTF-8">
-<!-- "audio/sine440.wav" -->
 
-<p>Audio Test</p>
+<head>
+  <title>Audio Test</title>
+  <style>
+
+      
+
+        @keyframes highlight {
+            0%{ background: rgba(255, 240, 140, 1); }
+            100%{ background: rgba(255, 240, 140, 0); }
+        }
+        @-moz-keyframes highlight{
+            0%{ background: rgba(255, 240, 140, 1); }
+            100%{ background: rgba(255, 240, 140, 0); }
+        }
+        @-webkit-keyframes highlight{
+            0%{ background: rgba(255, 240, 140, 1); }
+            100%{ background: rgba(255, 240, 140, 0); }
+        }
+
+
+        body { padding: 0; }
+
+        #container {
+            padding: 20px;
+        }
+
+        .highlight {
+            background: #fff68d;
+        }
+
+        .hero-unit {
+            padding: 0;
+        }
+
+        #toucharea {
+            padding: 30px;
+        }
+   
+
+      
+
+    </style>
+</head>
+
+<body>
+
+
+<!--
+<input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
+<input type="range" oninput="setPitch(sourceA.source,value);" value="1.0" step="0.0001" max="3.0" min="0.3"></input>
+<BR>
+<input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
+<input type="range" oninput="setPitch(sourceB.source,value);" value="1.0" step="0.001" max="3.0" min="0.3"></input>
+-->
+
+<div id="toucharea">
+
+<h1>Touch And Audio Test</h1>
+            <BR><BR><BR><BR><p>
+</div>
+
+
+
+
+
+
+
+
+
 
 <script src="js/buffer-loader.js"></script>
-
+<script src="js/hammer.min.js"></script>
 <script>
+
+  var pitch = 1.5;
+
+
+    
+  //touch hammer scripts-------------------------
+  //var hammertime = Hammer(document.getElementById("toucharea"));
+  //  console.log(hammertime);
+  new Hammer(document.getElementById("toucharea"),
+  { drag_lock_to_axis: true }).on("drag", handleHammer);
+ 
+  //touch events
+  function handleHammer(ev) {
+    console.log(ev);
+    // disable browser scrolling
+    //ev.gesture.preventDefault();
+    var touches = ev.gesture.touches;
+
+    for(var t = 0, len = touches.length; t < len; t++) {
+
+        target = touches[t].target;
+        //if(target.className.indexOf("drag") < 0) {
+        //    return;
+        //}
+        target.style.left = (touches[t].pageX - 50) + "px";
+        target.style.top = (touches[t].pageY - 50) + "px";
+        //convert touch position to tone value as an initial test
+        console.log('pos' + touches[t].pageX );
+        pitch = touches[0].pageY;
+        setPitch(sourceA.source,touches[t].pageY * 0.01);
+    }
+  }
+
+
+
 
 window.onload = init;
 var context;
 var bufferLoader;
 
-var newestSource;
+//var newestSource;
 
-var pitch = 1.5;
+
 
 function init() {
   // Fix up prefixing
@@ -34,16 +136,15 @@ function init() {
   bufferLoader.load();
 }
 
-//new sounds must create a source each time, seems inefficient, but this
-//is the requirement at the time of this writing http://updates.html5rocks.com/2012/01/Web-Audio-FAQ
+//new sounds must create a source each time
+//part of the standard http://updates.html5rocks.com/2012/01/Web-Audio-FAQ
 function playSound(buffer, time) {
   var source = context.createBufferSource();
   source.buffer = buffer;
   source.connect(context.destination);
   source.start(time);
   source.loop = true;
-
-  newestSource = source;
+  //newestSource = source;
 }
 
 
@@ -91,19 +192,13 @@ function finishedLoading(bufferList) {
 }
 
 function setPitch(source,rate) 
-{
-  
+{  
   source.playbackRate.value = rate;
 
 }
 
 </script>
 
-<input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
-<input type="range" oninput="setPitch(sourceA.source,value);" value="1.0" step="0.0001" max="3.0" min="0.3"></input>
-<BR>
-<input type="button" value="Play" onclick="playSound(sourceA.source.buffer,0);"></input>
-<input type="range" oninput="setPitch(sourceB.source,value);" value="1.0" step="0.001" max="3.0" min="0.3"></input>
 
 
 </html>
