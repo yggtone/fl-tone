@@ -6,4 +6,5 @@ Designed for phones and tablets held in portrait orientation, so that the thumbs
 Main content is on pages branch, and demo should be at:
 http://yggtone.github.io/fl-tone/
 
- 
+Uses <a href="http://eightmedia.github.io/hammer.js/">hammer.js</a> library under MIT license.
+Some code based on <a href="http://www.html5rocks.com">html5rocks.com</a> samples under Apache 2.0 license.
