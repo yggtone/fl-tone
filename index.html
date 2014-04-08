@@ -4,7 +4,7 @@
 
 <head>
   <title>Audio Test</title>
-  <style>
+  <style type="text/css">
 
       
 
@@ -22,7 +22,8 @@
         }
 
 
-        body { padding: 0; }
+        body { width:100%;
+            height:100%; padding: 0; }
 
         #container {
             padding: 20px;
@@ -32,16 +33,16 @@
             background: #fff68d;
         }
 
-        .hero-unit {
-            padding: 0;
-        }
-
         #toucharea {
-            padding: 30px;
+            padding: 0px;
         }
-   
+  
 
-      
+        
+        .box {margin:8px; position:absolute; top:0; left:0; right:0; bottom:0}
+       
+
+        #grid {width:100%; height:100%; border:0px solid #000;}
 
     </style>
 </head>
@@ -59,14 +60,10 @@
 
 <div id="toucharea">
 
-<h1>Touch And Audio Test</h1>
-            <BR><BR><BR><BR><p>
+<canvas id="grid" >
+</canvas>
+
 </div>
-
-
-
-
-
 
 
 
@@ -75,6 +72,48 @@
 <script src="js/buffer-loader.js"></script>
 <script src="js/hammer.min.js"></script>
 <script>
+
+  //draw canvas grid for measuring tone placement
+  function draw_grid() {
+    var g_canvas = document.getElementById("grid");
+    var context = g_canvas.getContext("2d");
+    context.canvas.width  = window.innerWidth;
+    context.canvas.height = window.innerHeight;
+    var gwidth  = window.innerWidth;
+    var gheight = window.innerHeight;
+    var gridDivision = 0.1;
+
+    for (var x = 0.0; x < gwidth; x += gwidth * gridDivision) {
+      context.moveTo(x, 0);
+      context.lineTo(x, gheight );
+    }
+    context.strokeStyle = "#e00";
+    context.stroke();
+ 
+    for (var y = 0.0; y < gheight; y += gheight * gridDivision) {
+      context.moveTo(0, y);
+      context.lineTo( gwidth , y);
+    }
+    //console.log('grid' + gwidth);
+    context.strokeStyle = "#e00";
+    context.stroke();
+  }
+  draw_grid();
+
+  function resetCanvas (e) {    
+    draw_grid();
+  }
+
+
+  window.onorientationchange = resetCanvas;
+  window.onresize = resetCanvas;
+
+
+
+  
+
+
+
 
   var pitch = 1.5;
 
@@ -99,103 +138,110 @@
         //if(target.className.indexOf("drag") < 0) {
         //    return;
         //}
-        target.style.left = (touches[t].pageX - 50) + "px";
-        target.style.top = (touches[t].pageY - 50) + "px";
-        //convert touch position to tone value as an initial test
-        console.log('pos' + touches[t].pageX );
-        pitch = touches[0].pageY;
-        setPitch(sourceA.source,touches[t].pageY * 0.01);
+        var toneValue = touches[t].pageY / window.innerHeight;
+        toneValue *= 2.0;
+        if( touches[t].pageX > (window.innerWidth * 0.5 ) ) {
+            setPitch(sourceB.source, toneValue );
+
+        }
+        else {
+            setPitch(sourceA.source, toneValue);
+
+        }
+ 
+        //console.log('pos' + touches[t].pageX + ' width' + window.innerWidth );
+      
     }
   }
 
 
 
 
-window.onload = init;
-var context;
-var bufferLoader;
-
-//var newestSource;
+  window.onload = init;
+  var context;
+  var bufferLoader;
 
 
+  function init() {
+    // Fix up prefixing
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    context = new AudioContext();
 
-function init() {
-  // Fix up prefixing
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  context = new AudioContext();
+    bufferLoader = new BufferLoader(
+      context,
+      [
+        'audio/sine440.wav',
+        'audio/sine440.wav',
+      ],
+      finishedLoading
+      );
 
-  bufferLoader = new BufferLoader(
-    context,
-    [
-      'audio/sine440.wav',
-      'audio/sine440.wav',
-    ],
-    finishedLoading
-    );
+    bufferLoader.load();
+  }
 
-  bufferLoader.load();
-}
-
-//new sounds must create a source each time
-//part of the standard http://updates.html5rocks.com/2012/01/Web-Audio-FAQ
-function playSound(buffer, time) {
-  var source = context.createBufferSource();
-  source.buffer = buffer;
-  source.connect(context.destination);
-  source.start(time);
-  source.loop = true;
-  //newestSource = source;
-}
+  //new sounds must create a source each time
+  //part of the standard http://updates.html5rocks.com/2012/01/Web-Audio-FAQ
+  function playSound(buffer, time) {
+    var source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    source.start(time);
+    source.loop = true;
+    //newestSource = source;
+  }
 
 
-function createSource(buffer) {
-  var source = context.createBufferSource();
-  // Create a gain node.
-  var gainNode = context.createGain();
-  source.buffer = buffer;
-  // Turn on looping.
-  source.loop = true;
-  // Connect source to gain.
-  source.connect(gainNode);
-  // Connect gain to destination.
-  gainNode.connect(context.destination);
+  function createSource(buffer) {
+    var source = context.createBufferSource();
+    // Create a gain node.
+    var gainNode = context.createGain();
+    source.buffer = buffer;
+    // Turn on looping.
+    source.loop = true;
+    // Connect source to gain.
+    source.connect(gainNode);
+    // Connect gain to destination.
+    gainNode.connect(context.destination);
 
-  return {
-    source: source,
-    gainNode: gainNode
-  };
-}
+    return {
+      source: source,
+      gainNode: gainNode
+    };
+  }
 
-var sourceA, sourceB;
+  var sourceA, sourceB;
 
-function finishedLoading(bufferList) {
-  // Create two sources and play them both together.
-  //var source1 = context.createBufferSource();
-  //var source2 = context.createBufferSource();
-  //source1.buffer = bufferList[0];
-  //source2.buffer = bufferList[1];
-  //source1.connect(context.destination);
-  //source2.connect(context.destination);
-  //source1.start(0);
-  //source2.start(0);
+  function finishedLoading(bufferList) {
+    // Create two sources and play them both together.
+    //var source1 = context.createBufferSource();
+    //var source2 = context.createBufferSource();
+    //source1.buffer = bufferList[0];
+    //source2.buffer = bufferList[1];
+    //source1.connect(context.destination);
+    //source2.connect(context.destination);
+    //source1.start(0);
+    //source2.start(0);
 
-  //prebuffer
-  sourceA = createSource(bufferList[0]);
-  sourceA.source.start(0);
-  sourceA.gainNode.gain.value = 0.1;
-  sourceA.source.playbackRate.value = 0.3;
-  
-  sourceB = createSource(bufferList[1]);
-  sourceB.source.start(0);
-  sourceB.gainNode.gain.value = 0.1;
-  sourceB.source.playbackRate.value = 1.0;
-}
+    //prebuffer
+    sourceA = createSource(bufferList[0]);
+    sourceA.source.start(0);
+    sourceA.gainNode.gain.value = 0.1;
+    sourceA.source.playbackRate.value = 0.3;
+    
+    sourceB = createSource(bufferList[1]);
+    sourceB.source.start(0);
+    sourceB.gainNode.gain.value = 0.1;
+    sourceB.source.playbackRate.value = 1.0;
+  }
 
-function setPitch(source,rate) 
-{  
-  source.playbackRate.value = rate;
-
-}
+  function setPitch(source,rate) 
+  { 
+    if(rate < 0.01 )
+      rate = 0.01;
+    if(rate > 1000.0)
+      rate = 1000.0; 
+    source.playbackRate.value = rate;
+  }
 
 </script>
 
